@@ -1,0 +1,61 @@
+<html>
+<head>
+  <title>Annotate interactions </title>
+  <style>
+    body {
+      padding: 2em;
+      background-color: rgb(240,240,240);
+      font-family: helvetica;
+    }
+    .controller {
+      color: rgb(90, 141, 255);
+      /*color: white;*/
+      padding-left: .1em;
+      padding-right: .1em;
+      font-weight: bold;
+    }
+    .controlled {
+      color: rgb(90, 141, 28);
+      /*color:white;*/
+      padding-left: .1em;
+      padding-right: .1em;
+      font-weight: bold;
+    }
+    li {
+      padding: .3em;
+    }
+    input[type="submit"]{
+      width: 100px;
+      height: 50px;
+      font-weight: bold;
+    }
+  </style>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $("#toggler").change(function(){
+        var checkboxes = $(".evidence")
+        checkboxes.prop("checked", !checkboxes.prop("checked"));
+      })
+    })
+  </script>
+</head>
+<body>
+  <h3> Consider the instances of the same interaction, uncheck the incorrect sentences</h3>
+  <br/>
+  <b>Controller</b>: <span class="controller">{{ interaction.controller.gid }}</span> -- <b>Controlled</b>: <span class="controlled">{{ interaction.controlled.gid }}</span>
+  <br />
+  <ul>
+    {% autoescape off %}
+    {% for evidence in evidence_set %}
+      <li><b>Correct?&nbsp;</b><input class="evidence" type="checkbox" checked=checked name="sentence_{{evidence.id}}" id="sentence_{{evidence.id}}">&nbsp;{{evidence.text}}</li>
+    {% endfor %}
+    {% endautoescape %}
+  </ul>
+
+  <br />
+  <input type="checkbox" checked="checked" id="toggler" value="select_all">Unselect/Select all</input>
+  <br />
+  <center><input type="submit", value="Save"></input></center>
+
+</body>
