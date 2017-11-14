@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from .models import *
 from .utils import *
 
@@ -21,9 +21,17 @@ def annotate(request):
     interaction = pi.interaction
     evidence = Evidence.objects.filter(pmcid = pi.pmcid, interaction = interaction.id)
 
+    evidence = group_evidence(evidence)
+
     for e in evidence:
         e.text = highlight_participants(e)
 
 
     return HttpResponse(render(request, "justifications/annotate.html", { "interaction": interaction,
         'evidence_set': evidence} ))
+
+def save_annotation(request):
+    if request.method == "POST":
+        store_annotation(request.POST)
+
+    return redirect('annotate')

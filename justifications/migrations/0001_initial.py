@@ -42,9 +42,11 @@ class Migration(migrations.Migration):
                 ('evidence', models.TextField()),
                 ('controller_text', models.TextField()),
                 ('controlled_text', models.TextField()),
+                ('context', models.TextField()),
             ],
             options={
                 'db_table': 'Evidence',
+                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -57,6 +59,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'Paper_Interaction',
+                'managed': False
             },
         ),
         migrations.AddField(

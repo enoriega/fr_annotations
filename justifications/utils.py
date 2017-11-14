@@ -1,3 +1,5 @@
+import itertools as it
+from collections import defaultdict
 from django.db.models import Q
 
 from .models import *
@@ -41,3 +43,23 @@ def highlight_participants(e):
     text = text.replace(controlled, '<span class="controlled">%s</span>' % controlled)
 
     return text
+
+def group_evidence(evidence):
+    grouped = defaultdict(list)
+
+    for e in evidence:
+        key = (e.evidence, e.controller_text, e.controlled_text)
+        grouped[key].append(e)
+
+    ret = list()
+    for k in grouped:
+        elements = grouped[k]
+        representative = elements[0]
+        ids = '_'.join(str(e.id) for e in elements)
+        representative.id = ids
+        ret.append(representative)
+
+    return ret
+
+# def store_annotation(params):
+#     annotation_id = 
