@@ -1,6 +1,7 @@
 import itertools as it
 from collections import defaultdict
 from django.db.models import Q
+from django.db import transaction
 
 from .models import *
 
@@ -31,7 +32,7 @@ def get_next_to_annotate(items):
     if elements.count() > 0:
         return elements[0]
     else:
-        return list()
+        return None
 
 def highlight_participants(e):
     controller = e.controller_text
@@ -61,5 +62,28 @@ def group_evidence(evidence):
 
     return ret
 
-# def store_annotation(params):
-#     annotation_id = 
+@transaction.atomic
+def store_annotation(params):
+    annotation_id = int(params['interaction_id'])
+    annotated_fields = [k for k in params if k.startswith("sentence") and params[k] == 'on']
+    annotated_sentence_ids = [int(i) for i in it.chain(*[k.split('_')[1:] for k in annotated_fields])]
+
+    pi = PaperInteraction.objects.get(pk=annotation_id)
+    sentences = Evidence.objects.filter(id__in=annotated_sentence_ids)
+
+    pi.annotated = True
+    pi.save()
+    for s in sentences:
+        s.correct = True
+        s.save()
+
+
+@transaction.atomic
+def clear_annotations():
+    for pi in PaperInteraction.objects.filter(annotated__isnull = False):
+        pi.annotated = None
+        pi.save()
+
+    for e in Evidence.objects.filter(correct__isnull = False):
+        e.correct = None
+        e.save()

@@ -41,25 +41,6 @@
   </script>
 </head>
 <body>
-  <h3> Consider the instances of the same interaction, uncheck the incorrect sentences</h3>
-  <br/>
-  <b>Controller</b>: <span class="controller">{{ interaction.controller.gid }}</span> -- <b>Controlled</b>: <span class="controlled">{{ interaction.controlled.gid }}</span>
-  <br />
-  <form method="post" action="{% url 'save' %}">
-    <input type="hidden" name="interaction_id" value="{{ pi.id }}" />
-  <ul>
-
-    {% autoescape off %}
-    {% for evidence in evidence_set %}
-      <li><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ evidence.pmcid }}/" target="_blank">{{ evidence.pmcid }}</a> - <b>Correct?&nbsp;</b><input class="evidence" type="checkbox" checked=checked name="sentence_{{evidence.id}}" id="sentence_{{evidence.id}}">&nbsp;{{evidence.text}}</li>
-    {% endfor %}
-    {% endautoescape %}
-  </ul>
-
-  <br />
-  <input type="checkbox" checked="checked" id="toggler" value="select_all">Unselect/Select all</input>
-  <br />
-  <center><input type="submit", value="Save"></input></center>
-</form>
+  <h3> You're done. Thanks! </h3>
 
 </body>
