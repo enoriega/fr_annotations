@@ -2,21 +2,18 @@ import itertools as it
 from collections import defaultdict
 from django.db.models import Q
 from django.db import transaction
+import csv, os
+
 
 from .models import *
 
 def get_items():
-    return [('PMC3291551', 725796),
- (u'PMC2802674', 653779),
- (u'PMC2802674', 271606),
- (u'PMC2802674', 147146),
- (u'PMC3174991', 177945),
- (u'PMC3174991', 653910),
- (u'PMC3174991', 311170),
- (u'PMC3174991', 317982),
- (u'PMC3174991', 514640),
- (u'PMC3174991', 390812),
- (u'PMC3174991', 9901)]
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data.txt')
+    with open(path) as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+    return [(pmcid, int(interaction)) for pmcid, interaction in rows]
 
 def get_next_to_annotate(items):
     # Build constraints
