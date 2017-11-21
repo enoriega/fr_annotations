@@ -27,8 +27,11 @@ def annotate(request):
         for e in evidence:
             e.text = highlight_participants(e)
 
+        controller_names = {e.controller_text for e in evidence}
+        controlled_names = {e.controlled_text for e in evidence}
 
-        return HttpResponse(render(request, "justifications/annotate.html", {"interaction": interaction,
+        return HttpResponse(render(request, "justifications/annotate.html", {"controllers": controller_names,
+            "controlleds":controlled_names, "interaction": interaction,
             'evidence_set': evidence} ))
     else:
         return HttpResponse(render(request, "justifications/finished.html"))

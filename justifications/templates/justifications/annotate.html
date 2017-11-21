@@ -43,7 +43,9 @@
 <body>
   <h3> Consider the instances of the same interaction, uncheck the incorrect sentences</h3>
   <br/>
-  <b>Controller</b>: <span class="controller">{{ interaction.controller.gid }}</span> -- <b>Controlled</b>: <span class="controlled">{{ interaction.controlled.gid }}</span>
+  <b>Controller</b>: {% for c in controllers %}<span class="controller">{{ c }}</span>, &nbsp; {% endfor %}
+  <br />
+  <b>Controlled</b>: {% for c in controlleds %}<span class="controlled">{{ c }}</span>, &nbsp; {% endfor %}
   <br />
   <form method="post" action="{% url 'save' %}">
     <input type="hidden" name="interaction_id" value="{{ interaction.id }}" />
