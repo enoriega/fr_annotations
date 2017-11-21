@@ -7,22 +7,51 @@ import csv, os
 
 from .models import *
 
+
 def get_items():
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data.txt')
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'to_annotate.txt')
     with open(path) as f:
         reader = csv.reader(f)
         rows = list(reader)
 
+    weighs = list()
+
+    for row in rows:
+        weighs.append((int(row[0]), len(row[1:])))
+
+    weighs = sorted(weighs, key=lambda x: x[1], reverse=True)
+
+    pathways = defaultdict(list)
+    for row in rows:
+        iid = int(row[0])
+        pways = row[1:]
+        for pway in pways:
+            pathways[pway].append(iid)
+
+    sorted_pathways = sorted([(k, sum(v)) for k, v in pathways.iteritems()], key=lambda x: x[1], reverse=True)
+
+    # Small collection so doesn't matter if this is suboptimal
+    ret = list()
+    for p in sorted_pathways:
+        for iid in pathways[p[0]]:
+            if not iid in ret:
+                ret.append(iid)
+
+    return ret
+
+
+
     return [(pmcid, int(interaction)) for pmcid, interaction in rows]
 
 def get_next_to_annotate(items):
+
     # Build constraints
-    constraints = Q(pmcid=items[0][0], interaction_id = items[0][1])
+    constraints = Q(id = items[0])
 
-    for pmcid, interaction_id in items[1:]:
-        constraints |= Q(pmcid=pmcid, interaction_id = interaction_id)
+    for interaction_id in items[1:]:
+        constraints |= Q(id = interaction_id)
 
-    unannotated = PaperInteraction.objects.filter(annotated__isnull = True)
+    unannotated = Interactions.objects.filter(annotated__isnull =True)
 
     elements = unannotated.filter(constraints)
 
@@ -30,6 +59,7 @@ def get_next_to_annotate(items):
         return elements[0]
     else:
         return None
+
 
 def highlight_participants(e):
     controller = e.controller_text
@@ -61,11 +91,12 @@ def group_evidence(evidence):
 
 @transaction.atomic
 def store_annotation(params):
+
     annotation_id = int(params['interaction_id'])
     annotated_fields = [k for k in params if k.startswith("sentence") and params[k] == 'on']
     annotated_sentence_ids = [int(i) for i in it.chain(*[k.split('_')[1:] for k in annotated_fields])]
 
-    pi = PaperInteraction.objects.get(pk=annotation_id)
+    pi = Interactions.objects.get(pk=annotation_id)
     sentences = Evidence.objects.filter(id__in=annotated_sentence_ids)
 
     pi.annotated = True
@@ -77,7 +108,7 @@ def store_annotation(params):
 
 @transaction.atomic
 def clear_annotations():
-    for pi in PaperInteraction.objects.filter(annotated__isnull = False):
+    for pi in Interactions.objects.filter(annotated__isnull = False):
         pi.annotated = None
         pi.save()
 

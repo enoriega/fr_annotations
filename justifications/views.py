@@ -15,12 +15,12 @@ def annotate(request):
     elements = get_items()
 
     # Get the next item to annotate
-    pi = get_next_to_annotate(elements)
+    interaction = get_next_to_annotate(elements)
 
-    if pi is not None:
+    if interaction is not None:
         # Get the information we care about
-        interaction = pi.interaction
-        evidence = Evidence.objects.filter(pmcid = pi.pmcid, interaction = interaction.id)
+        #interaction = pi.interaction
+        evidence = Evidence.objects.filter(interaction = interaction.id)
 
         evidence = group_evidence(evidence)
 
@@ -28,7 +28,7 @@ def annotate(request):
             e.text = highlight_participants(e)
 
 
-        return HttpResponse(render(request, "justifications/annotate.html", { "pi":pi, "interaction": interaction,
+        return HttpResponse(render(request, "justifications/annotate.html", {"interaction": interaction,
             'evidence_set': evidence} ))
     else:
         return HttpResponse(render(request, "justifications/finished.html"))

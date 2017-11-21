@@ -24,6 +24,8 @@ class Migration(migrations.Migration):
                 'db_table': 'Interactions',
                 'managed': False,
             },
+
+
         ),
         migrations.CreateModel(
             name='Participants',

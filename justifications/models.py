@@ -15,6 +15,8 @@ class Interactions(models.Model):
     controlled = models.ForeignKey('Participants', models.DO_NOTHING, db_column='controlled', related_name="participants_controlled")
     direction = models.IntegerField()
 
+    annotated = models.NullBooleanField(db_column="annotated")
+
     class Meta:
         managed = False
         db_table = 'Interactions'

@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'fr_justifications.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, '/Users/enrique/Research/focused_reading/dyce/code/interactions3.sqlite'),
+        'NAME': os.path.join(BASE_DIR, '/Users/enrique/Research/focused_reading/dyce/code/new_interactions.sqlite'),
     }
 }
 

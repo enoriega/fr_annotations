@@ -46,7 +46,7 @@
   <b>Controller</b>: <span class="controller">{{ interaction.controller.gid }}</span> -- <b>Controlled</b>: <span class="controlled">{{ interaction.controlled.gid }}</span>
   <br />
   <form method="post" action="{% url 'save' %}">
-    <input type="hidden" name="interaction_id" value="{{ pi.id }}" />
+    <input type="hidden" name="interaction_id" value="{{ interaction.id }}" />
   <ul>
 
     {% autoescape off %}
