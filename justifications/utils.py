@@ -65,7 +65,7 @@ def highlight_participants(e):
     controller = e.controller_text
     controlled = e.controlled_text
 
-    text = e.evidence
+    text = e.evidence.split('++++')[0]
 
     text = text.replace(controller, '<span class="controller">%s</span>' % controller)
     text = text.replace(controlled, '<span class="controlled">%s</span>' % controlled)
