@@ -55,10 +55,13 @@ def get_next_to_annotate(items):
 
     elements = unannotated.filter(constraints)
 
+    total_elements = len(items)
+
     if elements.count() > 0:
-        return elements[0]
+        index = total_elements - elements.count() + 1
+        return elements[0], index, total_elements
     else:
-        return None
+        return None, 0, total_elements
 
 
 def highlight_participants(e):

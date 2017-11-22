@@ -15,7 +15,7 @@ def annotate(request):
     elements = get_items()
 
     # Get the next item to annotate
-    interaction = get_next_to_annotate(elements)
+    interaction, index, total = get_next_to_annotate(elements)
 
     if interaction is not None:
         # Get the information we care about
@@ -32,7 +32,7 @@ def annotate(request):
 
         return HttpResponse(render(request, "justifications/annotate.html", {"controllers": controller_names,
             "controlleds":controlled_names, "interaction": interaction,
-            'evidence_set': evidence} ))
+            'evidence_set': evidence, 'index':index, 'total':total} ))
     else:
         return HttpResponse(render(request, "justifications/finished.html"))
 
