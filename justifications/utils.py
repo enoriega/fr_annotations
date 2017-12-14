@@ -55,13 +55,29 @@ def get_next_to_annotate(items):
 
     elements = unannotated.filter(constraints)
 
+    elements = sorted(elements, key=lambda e: items.index(e.id))
+
     total_elements = len(items)
 
-    if elements.count() > 0:
-        index = total_elements - elements.count() + 1
+    if len(elements) > 0:
+        index = total_elements - len(elements) + 1
         return elements[0], index, total_elements
     else:
         return None, 0, total_elements
+
+def get_skipped(items):
+    # Build constraints
+    skipped = Interactions.objects.filter(annotated = False)
+
+    if skipped.count() > 0:
+        elements = list()
+        indices = list()
+        for e in skipped:
+            elements.append(e)
+            indices.append(items.index(e.id)+1)
+        return elements, indices
+    else:
+        return list(), list()
 
 
 def highlight_participants(e):
@@ -107,6 +123,15 @@ def store_annotation(params):
     for s in sentences:
         s.correct = True
         s.save()
+
+@transaction.atomic
+def skip_annotation(params):
+
+    annotation_id = int(params['interaction_id'])
+
+    pi = Interactions.objects.get(pk=annotation_id)
+    pi.annotated = False
+    pi.save()
 
 
 @transaction.atomic

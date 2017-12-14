@@ -37,6 +37,9 @@
         var checkboxes = $(".evidence")
         checkboxes.prop("checked", !checkboxes.prop("checked"));
       })
+      $("#skip").click(function(){
+        $("#skipped").val("yes")
+      })
     })
   </script>
 </head>
@@ -63,7 +66,10 @@
   <br />
   <input type="checkbox" checked="checked" id="toggler" value="select_all">Unselect/Select all</input>
   <br />
+  <input type="hidden" id="skipped" value="no" name="skipped">
   <center><input type="submit", value="Save"></input></center>
+  <br />
+  <center><input id="skip" type="submit", value="Skip"></input></center>
 </form>
 
 </body>
