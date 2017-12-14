@@ -37,7 +37,7 @@
   <br>
   <ul>
     {% for e, i in interactions %}
-      <li><a href="{% url 'annotate_one' e.id %}">{{i}}</a></li><br/>
+      <li><a href="{% url 'annotate_one' e.id %}">ID: {{e.id}}</a></li>
     {% endfor %}
   </ul>
 </form>
