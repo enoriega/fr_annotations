@@ -1,0 +1,45 @@
+<html>
+<head>
+  <title>Annotate interactions </title>
+  <style>
+    body {
+      padding: 2em;
+      background-color: rgb(240,240,240);
+      font-family: helvetica;
+    }
+    .controller {
+      color: rgb(90, 141, 255);
+      /*color: white;*/
+      padding-left: .1em;
+      padding-right: .1em;
+      font-weight: bold;
+    }
+    .controlled {
+      color: rgb(90, 141, 28);
+      /*color:white;*/
+      padding-left: .1em;
+      padding-right: .1em;
+      font-weight: bold;
+    }
+    li {
+      padding: .3em;
+    }
+    input[type="submit"]{
+      width: 100px;
+      height: 50px;
+      font-weight: bold;
+    }
+  </style>
+
+</head>
+<body>
+  <h1> Skipped interactions </h1>
+  <br>
+  <ul>
+    {% for e, i in interactions %}
+      <li><a href="{% url 'annotate_one' e.id %}">{{i}}</a></li><br/>
+    {% endfor %}
+  </ul>
+</form>
+
+</body>
