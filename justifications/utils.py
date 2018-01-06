@@ -41,7 +41,7 @@ def get_items():
 
 
 
-    return [(pmcid, int(interaction)) for pmcid, interaction in rows]
+    #return [(pmcid, int(interaction)) for pmcid, interaction in rows]
 
 def get_next_to_annotate(items):
 
@@ -143,3 +143,74 @@ def clear_annotations():
     for e in Evidence.objects.filter(correct__isnull = False):
         e.correct = None
         e.save()
+
+
+def get_annotated():
+    interactions = Interactions.objects.filter(annotated__isnull = False)
+
+    ret = dict()
+    for interaction in interactions:
+        evidence = Evidence.objects.filter(interaction = interaction.id)
+        ret[interaction.id] = (interaction, list(evidence))
+
+    return ret
+
+def is_correct_generous(interaction, evidence):
+    labels = [e.correct if e.correct else False for e in evidence]
+    return any(labels)
+
+def is_correct_strict(interaction, evidence):
+    if interaction.annotated == False:
+        return False
+    else:
+        labels = [e.correct if e.correct else False for e in evidence ]
+        return all(labels)
+
+# TODO: Finish this
+def context_consistent(*evidence_sets):
+
+    context_sets = [set(it.chain(*[e.context.split(" ++++ ") for e in evidence])) for evidence in evidence_sets]
+
+    return True
+
+def get_pathways(path):
+    with open(path) as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+    pathways = defaultdict(list)
+
+    for row in rows:
+        interaction_id = int(row[0])
+        local_pathways = row[1:]
+        for pathway in local_pathways:
+            pathways[pathway].append(interaction_id)
+
+    return pathways
+
+def evaluate(pathways, eval_type, type='generous'):
+    # True correct, False incorrect
+    ret = dict()
+    annotations = get_annotated()
+    for pathway, interactions in pathways.iteritems():
+        jump = False
+        correct_values = list()
+        for interaction_id in interactions:
+            interaction, evidence = annotations[interaction_id]
+            if interaction.annotated == False and type == 'generous':
+                jump = True
+                break
+
+            is_correct = eval_type(interaction, evidence)
+            correct_values.append(is_correct)
+
+        if not jump:
+            ret[pathway] = (all(correct_values), correct_values)
+
+    return ret
+
+def evaluate_generous(pathways):
+    return evaluate(pathways, is_correct_generous)
+
+def evaluate_strict(pathways):
+    return evaluate(pathways, is_correct_strict, type='strict')
