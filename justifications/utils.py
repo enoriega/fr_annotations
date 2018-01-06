@@ -166,12 +166,18 @@ def is_correct_strict(interaction, evidence):
         labels = [e.correct if e.correct else False for e in evidence ]
         return all(labels)
 
-# TODO: Finish this
 def context_consistent(*evidence_sets):
 
     context_sets = [set(it.chain(*[e.context.split(" ++++ ") for e in evidence])) for evidence in evidence_sets]
 
-    return True
+    if any(len(cs) == 0 for cs in context_sets):
+        import ipdb; ipdb.set_trace()
+
+    chains = set(it.product(*context_sets))
+
+    consistent_chains = [len(set(chain)-set('')) == 1 for chain in chains]
+
+    return any(consistent_chains)
 
 def get_pathways(path):
     with open(path) as f:
@@ -193,10 +199,14 @@ def evaluate(pathways, eval_type, type='generous'):
     ret = dict()
     annotations = get_annotated()
     for pathway, interactions in pathways.iteritems():
+
         jump = False
         correct_values = list()
+        evidence_sets = list()
         for interaction_id in interactions:
             interaction, evidence = annotations[interaction_id]
+            evidence_sets.append(evidence)
+
             if interaction.annotated == False and type == 'generous':
                 jump = True
                 break
@@ -205,7 +215,13 @@ def evaluate(pathways, eval_type, type='generous'):
             correct_values.append(is_correct)
 
         if not jump:
-            ret[pathway] = (all(correct_values), correct_values)
+            #Context consistency
+            correctness = all(correct_values)
+            context_consistency = context_consistent(*evidence_sets)
+
+            ret[pathway] = (all(correct_values), correct_values, context_consistency)
+
+
 
     return ret
 
