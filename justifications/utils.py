@@ -2,11 +2,17 @@ import itertools as it
 from collections import defaultdict
 from django.db.models import Q
 from django.db import transaction
+import pandas as pd
 import csv, os
 
 
 from .models import *
 
+def get_paper_ids():
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'read_paper_ids.txt')
+    with open(path) as f:
+        ret = {s[:-1] for s in f}
+    return ret
 
 def get_items():
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'to_annotate.txt')
@@ -145,14 +151,25 @@ def clear_annotations():
         e.save()
 
 
-def get_annotated():
+def get_annotated(only_fr):
     interactions = Interactions.objects.filter(annotated__isnull = False)
 
+    papers = get_paper_ids()
+
     ret = dict()
+    supressed = 0
     for interaction in interactions:
         evidence = Evidence.objects.filter(interaction = interaction.id)
+
+        if only_fr:
+            prev_len = len(evidence)
+            evidence = [e for e in evidence if e.pmcid in papers]
+            if prev_len > 0 and len(evidence) == 0:
+                supressed += 1
+
         ret[interaction.id] = (interaction, list(evidence))
 
+    print "Supressed interactions: %i\n" % supressed
     return ret
 
 def is_correct_generous(interaction, evidence):
@@ -163,15 +180,18 @@ def is_correct_strict(interaction, evidence):
     if interaction.annotated == False:
         return False
     else:
-        labels = [e.correct if e.correct else False for e in evidence ]
-        return all(labels)
+        if len(evidence) == 0:
+            return False
+        else:
+            labels = [e.correct if e.correct else False for e in evidence ]
+            return all(labels)
 
 def context_consistent(*evidence_sets):
 
     context_sets = [set(it.chain(*[e.context.split(" ++++ ") for e in evidence])) for evidence in evidence_sets]
 
-    if any(len(cs) == 0 for cs in context_sets):
-        import ipdb; ipdb.set_trace()
+    # if any(len(cs) == 0 for cs in context_sets):
+    #     import ipdb; ipdb.set_trace()
 
     chains = set(it.product(*context_sets))
 
@@ -194,10 +214,10 @@ def get_pathways(path):
 
     return pathways
 
-def evaluate(pathways, eval_type, type='generous'):
+def evaluate(pathways, eval_type,  only_fr, type='generous'):
     # True correct, False incorrect
     ret = dict()
-    annotations = get_annotated()
+    annotations = get_annotated(only_fr)
     for pathway, interactions in pathways.iteritems():
 
         jump = False
@@ -225,8 +245,18 @@ def evaluate(pathways, eval_type, type='generous'):
 
     return ret
 
-def evaluate_generous(pathways):
-    return evaluate(pathways, is_correct_generous)
+def evaluate_generous(pathways, only_fr=True):
+    return evaluate(pathways, is_correct_generous, only_fr)
 
-def evaluate_strict(pathways):
-    return evaluate(pathways, is_correct_strict, type='strict')
+def evaluate_strict(pathways, only_fr=True):
+    return evaluate(pathways, is_correct_strict, only_fr, type='strict')
+
+def print_eval(data, context_aware=False):
+    frame = pd.DataFrame({'pathway':k, 'label':v[0], 'values':v[1], 'context':v[2]} for k, v in data.iteritems())
+
+    print frame.shape
+
+    if not context_aware:
+        print frame.label.value_counts()
+    else:
+        print frame[(frame.label == True) & (frame.context == True)].shape
